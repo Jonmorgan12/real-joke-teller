@@ -1,3 +1,6 @@
+const button = document.getElementById("button");
+const audioElement = document.getElementById("audio");
+
 // VoiceRSS Javascript SDK
 const VoiceRSS = {
   speech: function (e) {
@@ -102,15 +105,47 @@ const VoiceRSS = {
   },
 };
 
-function test() {
+// disabled / enabled button
+function toggleButton() {
+  button.disabled = !button.disabled;
+}
+
+// passing joke to voice rss api
+function tellMe(joke) {
+  console.log("tell me", joke);
   VoiceRSS.speech({
-    key: "<API key>",
-    src: "Hello, world!",
+    key: "1e01844476ef4d6fba82e3dd0643699e",
+    src: joke,
     hl: "en-us",
+    v: "Linda",
     r: 0,
     c: "mp3",
-    f: "8khz_8bit_mono",
+    f: "44khz_16bit_stereo",
     ssml: false,
   });
 }
-test();
+
+// get jokes from jokes api
+async function getJokes() {
+  let joke = "";
+  const apiUrl = "https://v2.jokeapi.dev/joke/Programming,Dark";
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    if (data.setup) {
+      joke = `${data.setup} .... ${data.delivery}`;
+    } else {
+      joke = data.joke;
+    }
+    // text to speech
+    tellMe(joke);
+    // disabled button
+    toggleButton();
+  } catch (error) {
+    console.log("fetch joke failed", error);
+  }
+}
+
+// event listeners
+button.addEventListener("click", getJokes);
+audioElement.addEventListener("ended", toggleButton);
